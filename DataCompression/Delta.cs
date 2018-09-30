@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System.Text;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace DataCompression {
@@ -7,7 +8,19 @@ namespace DataCompression {
 
         public static byte[] encode(string fileContent) {
             var encodedContent = populateListWithDeltaAlgorithm(fileContent);
-            return getByteArray(encodedContent);
+            var encodedContentInBytes = getByteArray(encodedContent);
+            var allEncodedContent = addFirstCharacter(encodedContentInBytes);
+            return allEncodedContent;
+        }
+
+        private static byte[] addFirstCharacter(byte[] encodedContent) {
+            var firstEncoded = (int)first;
+            var result = new byte[encodedContent.Length + 1];
+            result[0] = (byte)firstEncoded;
+            for (int i = 1; i < result.Length; i++) {
+                result[i] = encodedContent[i - 1];
+            }
+            return result;
         }
 
         private static List<bool> populateListWithDeltaAlgorithm(string fileContent) {
@@ -23,6 +36,7 @@ namespace DataCompression {
             }
             // The first one is separated.
             encodedContent.RemoveAt(0);
+            
             return encodedContent;
         }
 
@@ -42,10 +56,11 @@ namespace DataCompression {
         }
 
         public static string decode(byte[] fileContent) {
-            var decodedContent = first.ToString();
             var bits = new BitArray(fileContent);
-            foreach (var bit in bits) {
-                if (hasChanged(bit)) {
+            // We get the first character
+            var decodedContent = ((char)fileContent[0]).ToString();
+            for (int i = 8; i < bits.Length; i++) {
+                if (hasChanged(bits[i])) {
                     decodedContent = getChangedValue(decodedContent);
                 } else {
                     decodedContent += getEqualValue(decodedContent);
@@ -60,9 +75,9 @@ namespace DataCompression {
 
         private static string getChangedValue(string decodedContent) {
             if (decodedContent[decodedContent.Length - 1].Equals('0')) {
-                decodedContent += 1;
+                decodedContent += "1";
             } else {
-                decodedContent += 0;
+                decodedContent += "0";
             }
             return decodedContent;
         }

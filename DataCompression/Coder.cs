@@ -1,4 +1,6 @@
 ﻿using SharpLZW;
+using System.Text;
+using System.Collections;
 
 namespace DataCompression {
     public static class Coder {
